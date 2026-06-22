@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Niro — מערכת לידים להריסות + CRM (POC)
 
-## Getting Started
+מערכת שמושכת אוטומטית בניינים/מתחמים שצפויים להריסה **לפני** שלב היתר ההריסה,
+משלושה מקורות ממשלתיים פתוחים ועדכניים, מנרמלת לגוש/חלקה+מיקום, מתייגת בדחיפות, ומציגה
+ב‑CRM עם מפה ו‑Kanban. **סקופ: כל הארץ.**
 
-First, run the development server:
+> POC על **PostgreSQL**. להעלאה ל-Vercel (ללא GitHub) ראו [DEPLOY.md](DEPLOY.md).
+> לפיתוח מקומי אפשר להרים Postgres ב-Docker: `docker compose up -d`.
+
+## הרצה מהירה
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+# הגדר DATABASE_URL ב-.env (Postgres — ראו .env.example / DEPLOY.md)
+npm run db:deploy             # יוצר את הטבלאות במסד
+npm run ingest                # מושך לידים אמיתיים מכל 3 המקורות + dedup
+npm run dev                   # מריץ את האפליקציה (http://localhost:3000)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `npm run ingest` — כל המקורות. `npm run ingest URBAN_RENEWAL` — מקור בודד.
+- `npm run db:studio` — דפדפן ל-DB.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ארכיטקטורה
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+fetchRaw() → toLead() → validate(zod) → geo(proj4 ITM→WGS84) → score() → upsert(dedup)
+```
 
-## Learn More
+| רכיב | מימוש |
+|---|---|
+| Framework | Next.js (App Router) + TypeScript |
+| DB / ORM | PostgreSQL + Prisma |
+| מפה | MapLibre GL (CARTO raster, ללא מפתח) |
+| קואורדינטות | proj4 — ITM (EPSG:2039) → WGS84 |
+| UI | עוצב דרך הסקיל `ui pro max` (Data-Dense Dashboard, RTL עברית) |
 
-To learn more about Next.js, take a look at the following resources:
+קוד מרכזי: `src/lib/connectors/*` (מקורות), `src/lib/ingest.ts` (צינור),
+`src/lib/dedup.ts` (איחוד חוצה-מקורות), `src/lib/geo.ts` (proj4), `src/components/*` (CRM).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## מקורות הנתונים (מאומתים, ללא token)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| מקור | endpoint | סוג |
+|---|---|---|
+| התחדשות עירונית | `services6.arcgis.com/.../GIS_UrbanRenewal/FeatureServer/1` | ArcGIS (פוליגון, ITM) |
+| תכניות iplan | `ags.iplan.gov.il/arcgisiplan/.../Xplan/MapServer/1` | ArcGIS (פוליגון, ITM) |
+| מבנים מסוכנים | `gisn.tel-aviv.gov.il/.../IView2/MapServer/591` | ArcGIS (נקודה) |
 
-## Deploy on Vercel
+מבנים מסוכנים: config-driven (`src/lib/connectors/dangerousBuildings.ts`) —
+הוספת רשות = הוספת אובייקט למערך, לא קוד.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ניקוד דחיפות (score)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| שלב | Score | צבע |
+|---|---|---|
+| הוכרז מסוכן | 90 | אדום |
+| תכנית מאושרת | 60 | ענבר |
+| תכנית שהופקדה | 50 | כחול |
+| תכנון מוקדם | 30 | אפור |
+
+בונוס קטן לפי מס' יח"ד (תקרה 100).
+
+## תזמון אוטומטי
+
+`GET /api/cron/ingest` מריץ את כל ה-connectors + dedup ורושם ל-`IngestRun`.
+
+- **Vercel Cron:** מוגדר ב-[`vercel.json`](vercel.json) — יומי ב-03:00.
+- **GitHub Actions:** [`.github/workflows/ingest.yml`](.github/workflows/ingest.yml) — חלופה לכל אירוח.
+- אבטחה אופציונלית: הגדרת `CRON_SECRET` ב-env מחייבת `Authorization: Bearer <secret>`.
+
+## Roadmap (אחרי POC)
+
+1. שכבת PostGIS ל-dedup מרחבי בתוך ה-DB (כרגע ברמת האפליקציה; ה-DB כבר PostgreSQL).
+2. השלמת גוש/חלקה חסר דרך שכבת חלקות לאומית (spatial query).
+3. govmap (token) להעשרת כתובת↔גוש/חלקה — לכשיהיה דומיין חי.
+4. היתרי הריסה עירוניים (זחילה), מכרזי רשויות מקומיות.
+5. התראות בזמן אמת, ריבוי משתמשים, העשרת לידים.

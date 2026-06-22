@@ -1,0 +1,71 @@
+// POC לידים להריסות — Prisma schema (PostgreSQL)
+// השדות source/stage/status הם String (לא enum) לשמירה על קוד פשוט ועקבי;
+// הערכים החוקיים מוגדרים ומאומתים ב-TypeScript: src/lib/domain.ts (zod).
+// rawData נשמר כ-String (JSON.stringify) — מספיק ל-POC; אפשר לשדרג ל-Jsonb בהמשך.
+// שכבת PostGIS (dedup מרחבי ב-DB) שמורה ל-Roadmap; כרגע ה-dedup ברמת האפליקציה.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lead {
+  id             String   @id @default(cuid())
+  source         String // Source: URBAN_RENEWAL | DANGEROUS_BUILDING | IPLAN_PLAN
+  externalId     String // מזהה במקור — מפתח ל-dedup
+  title          String
+  url            String? // קישור למקור המקורי
+  address        String?
+  city           String?
+  block          String? // גוש
+  parcel         String? // חלקה
+  lat            Float? // WGS84 (אחרי המרה מ-ITM)
+  lng            Float?
+  stage          String // Stage: PLANNING | DEPOSITED | APPROVED | DANGEROUS_DECLARED
+  expectedMonths Int? // צפי עד הריסה (נגזר מ-stage)
+  units          Int? // יח"ד (רלוונטי להתחדשות עירונית)
+  score          Int      @default(0)
+  status         String   @default("NEW") // LeadStatus
+  assignee       String?
+  developer       String? // שם היזם (אותר ממדלן, ידני)
+  developerUrl    String? // קישור לעמוד היזם במדלן
+  developerSource String? // מקור היזם: "madlan" (מאומת) | "web" (חיפוש רשת, לא מאומת)
+  dupeOfId       String? // dedup חוצה-מקורות: מצביע על הליד הראשי
+  rawData        String // המטען המקורי כ-JSON
+  notes          Note[]
+  firstSeenAt    DateTime @default(now())
+  lastSeenAt     DateTime @updatedAt
+
+  @@unique([source, externalId])
+  @@index([city])
+  @@index([status])
+  @@index([source])
+  @@index([score])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  leadId    String
+  body      String
+  author    String?
+  createdAt DateTime @default(now())
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+}
+
+model IngestRun {
+  id        String    @id @default(cuid())
+  source    String
+  startedAt DateTime  @default(now())
+  finished  DateTime?
+  created   Int       @default(0)
+  updated   Int       @default(0)
+  errors    Int       @default(0)
+  message   String? // סיכום/שגיאה אחרונה
+}

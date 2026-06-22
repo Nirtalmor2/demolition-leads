@@ -1,0 +1,18 @@
+# טריגר חיצוני יומי ל-ingest (חלופה ל-Vercel Cron, לכל אירוח).
+# מגדירים שני Secrets ב-repo: INGEST_URL (כתובת הדיפלוי) ו-CRON_SECRET (אם הוגדר).
+name: daily-ingest
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # 03:00 UTC יומי
+  workflow_dispatch: {} # הרצה ידנית מה-UI
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger ingest endpoint
+        run: |
+          curl -sS -X GET "${{ secrets.INGEST_URL }}/api/cron/ingest" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 290 --fail-with-body
