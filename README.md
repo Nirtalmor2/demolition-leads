@@ -11,7 +11,7 @@
 
 ```bash
 npm install
-# הגדר DATABASE_URL ב-.env (Postgres — ראו .env.example / DEPLOY.md)
+# הגדר DATABASE_URL ב-.env (אותה כתובת גם ל-Vercel — ראו .env.example / DEPLOY.md)
 npm run db:deploy             # יוצר את הטבלאות במסד
 npm run ingest                # מושך לידים אמיתיים מכל 3 המקורות + dedup
 npm run dev                   # מריץ את האפליקציה (http://localhost:3000)

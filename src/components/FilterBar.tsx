@@ -38,16 +38,16 @@ export function FilterBar({
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
 
   return (
-    <div className="flex flex-wrap items-end gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+    <div className="flex flex-wrap items-end gap-3 rounded-xl border border-white/10 bg-dashboard-card px-4 py-3 mb-4 animate-fade-in">
       <Field label="חיפוש חופשי">
         <div className="relative">
-          <SearchIcon className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-subtle)]" />
+          <SearchIcon className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-white/40" />
           <input
             type="search"
             value={filters.q}
             onChange={(e) => set({ q: e.target.value })}
             placeholder="כותרת, כתובת, גוש/חלקה…"
-            className="h-9 w-56 rounded-md border border-[var(--color-border-strong)] bg-white pr-8 pl-2 text-sm outline-none transition-colors focus:border-[var(--color-primary)] focus:ring-2 focus:ring-blue-500/20"
+            className="h-9 w-56 rounded-md border border-white/10 bg-white/5 pr-8 pl-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-[var(--dashboard-accent)] focus:ring-2 focus:ring-[var(--dashboard-accent)]/20"
           />
         </div>
       </Field>
@@ -71,7 +71,7 @@ export function FilterBar({
           value={filters.city}
           onChange={(e) => set({ city: e.target.value })}
           placeholder="כל הערים"
-          className="h-9 w-36 rounded-md border border-[var(--color-border-strong)] bg-white px-2 text-sm outline-none transition-colors focus:border-[var(--color-primary)] focus:ring-2 focus:ring-blue-500/20"
+          className="h-9 w-36 rounded-md border border-white/10 bg-white/5 px-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-[var(--dashboard-accent)] focus:ring-2 focus:ring-[var(--dashboard-accent)]/20"
         />
       </Field>
 
@@ -108,8 +108,10 @@ export function FilterBar({
         filters.minScore ||
         filters.q) && (
         <button
-          onClick={() => onChange({ ...EMPTY_FILTERS, sort: filters.sort, dir: filters.dir })}
-          className="h-9 cursor-pointer rounded-md px-3 text-sm font-medium text-[var(--color-primary)] transition-colors hover:bg-blue-50"
+          onClick={() =>
+            onChange({ ...EMPTY_FILTERS, sort: filters.sort, dir: filters.dir })
+          }
+          className="h-9 cursor-pointer rounded-md px-3 text-sm font-medium text-[var(--dashboard-accent)] transition-colors hover:bg-white/5"
         >
           נקה סינון
         </button>

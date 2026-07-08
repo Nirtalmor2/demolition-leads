@@ -54,3 +54,6 @@ dev.log
 /research/
 
 .vercel
+
+.vercel
+.env*

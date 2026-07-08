@@ -14,7 +14,17 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createClient() {
-  const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL;
+
+  if (!connectionString) {
+    console.error("DATABASE_URL not found in process.env");
+    console.error("Available vars:", Object.keys(process.env).filter(k => k.includes("DATABASE") || k.includes("POSTGRES")));
+    throw new Error(
+      "Missing DATABASE_URL. Set the same connection string locally and in Vercel."
+    );
+  }
+
+  const adapter = new PrismaNeon({ connectionString });
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],

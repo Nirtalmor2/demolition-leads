@@ -10,9 +10,16 @@ on:
 jobs:
   ingest:
     runs-on: ubuntu-latest
+    env:
+      INGEST_URL: ${{ secrets.INGEST_URL || 'https://nirobnzpoc.vercel.app' }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET || '' }}
     steps:
       - name: Trigger ingest endpoint
         run: |
-          curl -sS -X GET "${{ secrets.INGEST_URL }}/api/cron/ingest" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+          auth_args=()
+          if [ -n "$CRON_SECRET" ]; then
+            auth_args=(-H "Authorization: Bearer $CRON_SECRET")
+          fi
+
+          curl -sS -X GET "$INGEST_URL/api/cron/ingest" "${auth_args[@]}" \
             --max-time 290 --fail-with-body

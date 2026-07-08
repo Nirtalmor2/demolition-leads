@@ -36,19 +36,19 @@ function Card({
       {...listeners}
       {...attributes}
       onClick={() => onSelect?.(lead.id)}
-      className={`cursor-grab touch-none rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 shadow-sm transition-colors hover:border-[var(--color-border-strong)] active:cursor-grabbing ${
+      className={`card-hover cursor-grab touch-none rounded-lg border border-white/10 bg-dashboard-card p-2.5 active:cursor-grabbing ${
         isDragging && !overlay ? "opacity-30" : ""
-      } ${overlay ? "rotate-2 shadow-lg" : ""}`}
+      } ${overlay ? "rotate-2 shadow-xl border-white/20" : ""}`}
     >
       <div className="mb-1.5 flex items-start justify-between gap-2">
-        <span className="line-clamp-2 text-xs font-medium text-[var(--color-text)]">
+        <span className="line-clamp-2 text-xs font-medium text-white">
           {lead.title}
         </span>
         <ScoreBadge score={lead.score} />
       </div>
       <div className="flex items-center justify-between gap-2">
         <SourceBadge source={lead.source} />
-        <span className="truncate text-[11px] text-[var(--color-text-subtle)]">
+        <span className="truncate text-[11px] text-white/40">
           {lead.city ?? ""}
         </span>
       </div>
@@ -69,19 +69,19 @@ function Column({
   return (
     <div className="flex w-72 shrink-0 flex-col">
       <div className="mb-2 flex items-center justify-between px-1">
-        <span className="text-sm font-semibold text-[var(--color-text)]">
+        <span className="text-sm font-semibold text-white/80">
           {STATUS_LABELS[status]}
         </span>
-        <span className="rounded-full bg-[var(--color-surface-2)] px-2 py-0.5 text-xs font-medium text-[var(--color-text-muted)]">
+        <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/50">
           {leads.length}
         </span>
       </div>
       <div
         ref={setNodeRef}
-        className={`flex min-h-24 flex-1 flex-col gap-2 rounded-lg border-2 border-dashed p-2 transition-colors ${
+        className={`flex min-h-24 flex-1 flex-col gap-2 rounded-xl border-2 border-dashed p-2 transition-colors ${
           isOver
-            ? "border-[var(--color-primary)] bg-blue-50/60"
-            : "border-[var(--color-border)] bg-[var(--color-surface-2)]/40"
+            ? "border-[var(--dashboard-accent)] bg-[var(--dashboard-accent)]/10"
+            : "border-white/5 bg-white/[0.02]"
         }`}
       >
         {leads.map((l) => (

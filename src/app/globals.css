@@ -1,65 +1,203 @@
 @import "tailwindcss";
-@import "maplibre-gl/dist/maplibre-gl.css";
+@import "tw-animate-css";
 
-/* ── מערכת עיצוב: Data-Dense Dashboard (ui pro max) ──────────────────────────
-   פלטת Analytics Dashboard: כחול נתונים + הדגשות ענבר. רקע בהיר, צפיפות מידע גבוהה. */
-@theme {
-  --color-bg: #f8fafc; /* slate-50 — רקע אפליקציה */
-  --color-surface: #ffffff; /* כרטיסים/טבלאות */
-  --color-surface-2: #f1f5f9; /* slate-100 — כותרות/אזורים משניים */
-  --color-border: #e2e8f0; /* slate-200 */
-  --color-border-strong: #cbd5e1; /* slate-300 */
+@custom-variant dark (&:is(.dark *));
 
-  --color-primary: #1e40af; /* blue-800 — מותג */
-  --color-primary-hover: #1d4ed8; /* blue-700 */
-  --color-accent: #f59e0b; /* amber-500 — CTA/הדגשה */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-heebo), 'Assistant', 'Heebo', 'Rubik', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
 
-  --color-text: #0f172a; /* slate-900 — טקסט ראשי */
-  --color-text-muted: #475569; /* slate-600 — טקסט משני */
-  --color-text-subtle: #94a3b8; /* slate-400 — רמזים */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-  /* סולם דחיפות (score) */
-  --color-urgent: #dc2626; /* אדום — מסוכן/90 */
-  --color-high: #ea580c; /* כתום — מכרז/80 */
-  --color-medium: #d97706; /* ענבר — מאושר/60 */
-  --color-low: #2563eb; /* כחול — הופקד/50 */
-  --color-faint: #64748b; /* אפור — תכנון/30 */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 
-  --color-success: #16a34a;
-
-  --font-sans: var(--font-heebo), system-ui, sans-serif;
-
-  --radius: 0.5rem;
+  --color-dashboard-bg: var(--dashboard-bg);
+  --color-dashboard-card: var(--dashboard-card);
+  --color-dashboard-sidebar: var(--dashboard-sidebar);
+  --color-dashboard-accent: var(--dashboard-accent);
+  --color-status-passed: var(--status-passed);
+  --color-status-failed: var(--status-failed);
+  --color-status-warning: var(--status-warning);
+  --color-status-info: var(--status-info);
 }
 
-* {
-  box-sizing: border-box;
+:root {
+  --radius: 0.625rem;
+
+  --background: #0f1117;
+  --foreground: oklch(0.985 0 0);
+  --card: #141724;
+  --card-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+
+  --primary-color: #1e3c72;
+  --secondary-color: #2a5298;
+
+  --dashboard-bg: #0f1117;
+  --dashboard-card: #141724;
+  --dashboard-sidebar: #0f0f23;
+  --dashboard-accent: #9f7aea;
+  --status-passed: #48bb78;
+  --status-failed: #f56565;
+  --status-warning: #ecc94b;
+  --status-info: #4299e1;
 }
 
-html,
-body {
-  height: 100%;
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: oklch(0.708 0 0 / 50%);
+  }
+
+  html {
+    direction: rtl;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--dashboard-accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--dashboard-accent);
+    color: white;
+  }
+
+  button,
+  a,
+  [role="button"],
+  label[for],
+  select {
+    cursor: pointer;
+  }
+
+  select option {
+    background: var(--dashboard-card);
+    color: var(--foreground);
+  }
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-
-/* פס גלילה דק ועקבי */
+/* Custom scrollbar */
 *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: var(--color-border-strong);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 9999px;
-  border: 2px solid var(--color-bg);
 }
 *::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* Entrance animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes runningHalo {
+  0%, 100% { box-shadow: inset 0 0 60px 10px rgba(99, 102, 241, 0.15), inset 0 0 120px 30px rgba(139, 92, 246, 0.08); }
+  50% { box-shadow: inset 0 0 100px 20px rgba(139, 92, 246, 0.25), inset 0 0 180px 50px rgba(99, 102, 241, 0.12); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 2s ease-in-out infinite;
+}
+
+.running-halo {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  animation: runningHalo 3s ease-in-out infinite;
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Gradient utilities */
+.gradient-primary {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, #38a169, #48bb78);
+}
+
+.gradient-danger {
+  background: linear-gradient(135deg, #e53e3e, #f56565);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -67,16 +205,4 @@ body {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* התאמות MapLibre ל-RTL/עברית */
-.maplibregl-popup-content {
-  direction: rtl;
-  text-align: right;
-  font-family: var(--font-sans);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-}
-.maplibregl-ctrl-attrib {
-  font-size: 10px;
 }
