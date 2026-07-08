@@ -168,20 +168,20 @@ export function CrmApp() {
               </button>
             ))}
           </nav>
-
-          {/* Collapse toggle */}
-          <button
-            onClick={() => setSidebarOpen((p) => !p)}
-            className="absolute -left-3 top-1/2 -translate-y-1/2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-white/10 border border-white/20 text-white/60 hover:text-white hover:bg-white/20 transition-colors"
-            aria-label={sidebarOpen ? "כווץ סרגל" : "הרחב סרגל"}
-          >
-            <ChevronRight
-              className={`w-3.5 h-3.5 transition-transform duration-300 ${
-                sidebarOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
         </div>
+
+        {/* Collapse toggle */}
+        <button
+          onClick={() => setSidebarOpen((p) => !p)}
+          className="absolute -left-3 top-1/2 -translate-y-1/2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-white/10 border border-white/20 text-white/60 hover:text-white hover:bg-white/20 transition-colors"
+          aria-label={sidebarOpen ? "כווץ סרגל" : "הרחב סרגל"}
+        >
+          <ChevronRight
+            className={`w-3.5 h-3.5 transition-transform duration-300 ${
+              sidebarOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
       </aside>
 
       {/* Main */}
