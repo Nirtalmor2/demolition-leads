@@ -1,0 +1,17 @@
+# PostgreSQL מקומי לפיתוח (אופציונלי). הרצה: docker compose up -d
+# ואז ב-.env:  DATABASE_URL="postgresql://niro:niro@localhost:5432/niro"
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: niro-db
+    environment:
+      POSTGRES_USER: niro
+      POSTGRES_PASSWORD: niro
+      POSTGRES_DB: niro
+    ports:
+      - "5432:5432"
+    volumes:
+      - niro_pgdata:/var/lib/postgresql/data
+
+volumes:
+  niro_pgdata:
