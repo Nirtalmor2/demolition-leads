@@ -7,19 +7,25 @@ import { LeadsTable } from "./LeadsTable";
 import { KanbanBoard } from "./KanbanBoard";
 import { LeadDrawer } from "./LeadDrawer";
 import { Spinner } from "./ui";
-import { TableIcon, KanbanIcon, RefreshIcon } from "./icons";
+import { RefreshIcon } from "./icons";
 import {
   Building2,
   AlertTriangle,
   ChevronRight,
   Clock,
+  Table,
+  ClipboardList,
 } from "lucide-react";
+
+import type { ComponentType } from "react";
 
 type View = "table" | "kanban";
 
-const VIEWS: { id: View; label: string; Icon: typeof TableIcon }[] = [
-  { id: "table", label: "טבלה", Icon: TableIcon },
-  { id: "kanban", label: "Kanban", Icon: KanbanIcon },
+type ViewIcon = ComponentType<{ className?: string; width?: number; height?: number }>;
+
+const VIEWS: { id: View; label: string; Icon: ViewIcon }[] = [
+  { id: "table", label: "טבלה", Icon: Table as ViewIcon },
+  { id: "kanban", label: "לוח ביצוע", Icon: ClipboardList as ViewIcon },
 ];
 
 function buildQuery(f: Filters, take: number, skip: number): string {
@@ -161,6 +167,20 @@ export function CrmApp() {
               </button>
             ))}
           </nav>
+
+          {/* Footer */}
+          {sidebarOpen && (
+            <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center gap-1.5 border-t border-white/10 px-4 py-3">
+              <img
+                src="/NiroLogo.png"
+                alt="Niro"
+                className="h-8 w-auto"
+              />
+              <p className="text-[10px] text-white/30">
+                כל הזכויות שמורות © {new Date().getFullYear()}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Collapse toggle */}
