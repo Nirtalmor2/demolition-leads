@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
         : { score: dir };
 
   try {
-    const [leads, total, totalUrgent, totalGeo] = await Promise.all([
+    const [leads, total, totalUrgent] = await Promise.all([
       prisma.lead.findMany({
         where,
         orderBy,
@@ -71,20 +71,18 @@ export async function GET(req: NextRequest) {
       }),
       prisma.lead.count({ where }),
       prisma.lead.count({ where: { ...where, score: { gte: 85 } } }),
-      prisma.lead.count({ where: { ...where, lat: { not: null } } }),
     ]);
 
     return NextResponse.json({
       total,
       totalUrgent,
-      totalGeo,
       count: leads.length,
       leads,
     });
   } catch (error) {
     console.error("Failed to load leads from database", error);
     return NextResponse.json(
-      { total: 0, totalUrgent: 0, totalGeo: 0, count: 0, leads: [], warning: "database-unavailable" },
+      { total: 0, totalUrgent: 0, count: 0, leads: [], warning: "database-unavailable" },
       { status: 200 }
     );
   }

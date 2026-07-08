@@ -20,13 +20,6 @@ export const TableIcon = (p: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const MapIcon = (p: SVGProps<SVGSVGElement>) => (
-  <svg {...base(p)}>
-    <path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z" />
-    <path d="M9 3v15M15 6v15" />
-  </svg>
-);
-
 export const KanbanIcon = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}>
     <path d="M6 4v16M12 4v10M18 4v7" />

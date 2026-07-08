@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import type { LeadDTO } from "@/lib/types";
 import type { LeadStatus } from "@/lib/domain";
 import { FilterBar, EMPTY_FILTERS, type Filters } from "./FilterBar";
@@ -8,25 +7,18 @@ import { LeadsTable } from "./LeadsTable";
 import { KanbanBoard } from "./KanbanBoard";
 import { LeadDrawer } from "./LeadDrawer";
 import { Spinner } from "./ui";
-import { TableIcon, MapIcon, KanbanIcon, RefreshIcon } from "./icons";
+import { TableIcon, KanbanIcon, RefreshIcon } from "./icons";
 import {
   Building2,
   AlertTriangle,
-  MapPin,
   ChevronRight,
   Clock,
 } from "lucide-react";
 
-const LeadsMap = dynamic(
-  () => import("./LeadsMap").then((m) => m.LeadsMap),
-  { ssr: false, loading: () => <Spinner label="טוען מפה…" /> }
-);
-
-type View = "table" | "map" | "kanban";
+type View = "table" | "kanban";
 
 const VIEWS: { id: View; label: string; Icon: typeof TableIcon }[] = [
   { id: "table", label: "טבלה", Icon: TableIcon },
-  { id: "map", label: "מפה", Icon: MapIcon },
   { id: "kanban", label: "Kanban", Icon: KanbanIcon },
 ];
 
@@ -56,7 +48,6 @@ export function CrmApp() {
   const [pageSize, setPageSize] = useState(25);
   const [total, setTotal] = useState(0);
   const [totalUrgent, setTotalUrgent] = useState(0);
-  const [totalGeo, setTotalGeo] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -74,7 +65,6 @@ export function CrmApp() {
     setLeads(data.leads ?? []);
     setTotal(data.total ?? 0);
     setTotalUrgent(data.totalUrgent ?? 0);
-    setTotalGeo(data.totalGeo ?? 0);
     setLoading(false);
   }, []);
 
@@ -92,8 +82,7 @@ export function CrmApp() {
   const stats = useMemo(() => ({
     total,
     urgent: totalUrgent,
-    geo: totalGeo,
-  }), [total, totalUrgent, totalGeo]);
+  }), [total, totalUrgent]);
 
   const onStatusChange = async (id: string, status: LeadStatus) => {
     setLeads((prev) =>
@@ -225,12 +214,6 @@ export function CrmApp() {
                     </div>
                     <div className="text-xs text-white/60">דחופים</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-white">
-                      {stats.geo.toLocaleString("he-IL")}
-                    </div>
-                    <div className="text-xs text-white/60">על המפה</div>
-                  </div>
                 </div>
 
                 {/* Glass clock badge */}
@@ -253,7 +236,7 @@ export function CrmApp() {
           </header>
 
           {/* Stats cards row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 animate-fade-in">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 animate-fade-in">
             <StatsCard
               icon={<Building2 className="w-5 h-5" />}
               title="סה״כ לידים"
@@ -265,12 +248,6 @@ export function CrmApp() {
               title="דחופים"
               value={stats.urgent}
               color="red"
-            />
-            <StatsCard
-              icon={<MapPin className="w-5 h-5" />}
-              title="על המפה"
-              value={stats.geo}
-              color="green"
             />
           </div>
 
@@ -308,7 +285,7 @@ export function CrmApp() {
             )}
 
             <div className="relative min-w-0 flex-1 overflow-hidden">
-              {loading && view !== "map" ? (
+              {loading ? (
                 <Spinner />
               ) : view === "table" ? (
                 <LeadsTable
@@ -326,8 +303,6 @@ export function CrmApp() {
                     setPage(0);
                   }}
                 />
-              ) : view === "map" ? (
-                <LeadsMap leads={leads} onSelect={setSelectedId} />
               ) : (
                 <KanbanBoard
                   leads={leads}

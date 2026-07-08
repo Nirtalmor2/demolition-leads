@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "maplibre-gl/dist/maplibre-gl.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -199,18 +198,6 @@
 
 .gradient-danger {
   background: linear-gradient(135deg, #e53e3e, #f56565);
-}
-
-/* MapLibre RTL adjustments */
-.maplibregl-popup-content {
-  direction: rtl;
-  text-align: right;
-  font-family: var(--font-sans);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-}
-.maplibregl-ctrl-attrib {
-  font-size: 10px;
 }
 
 @media (prefers-reduced-motion: reduce) {
