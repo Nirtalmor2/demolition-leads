@@ -1,18 +1,20 @@
 "use client";
 import { useEffect, useRef } from "react";
-import maplibregl, { type GeoJSONSource, type StyleSpecification } from "maplibre-gl";
+import maplibregl, {
+  type GeoJSONSource,
+  type StyleSpecification,
+} from "maplibre-gl";
 import type { LeadDTO } from "@/lib/types";
 
-// בסיס מפה חינמי (CARTO Positron, raster) — ללא מפתח API. RTL ידידותי, נקי לדאשבורד.
 const STYLE: StyleSpecification = {
   version: 8,
   sources: {
     carto: {
       type: "raster",
       tiles: [
-        "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-        "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-        "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+        "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+        "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+        "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
       ],
       tileSize: 256,
       attribution: "© OpenStreetMap © CARTO",
@@ -21,19 +23,18 @@ const STYLE: StyleSpecification = {
   layers: [{ id: "carto", type: "raster", source: "carto" }],
 };
 
-// צבע נקודה לפי score (סולם הדחיפות)
 const COLOR_EXPR = [
   "step",
   ["get", "score"],
-  "#64748b",
+  "#718096",
   40,
-  "#2563eb",
+  "#4299e1",
   55,
-  "#d97706",
+  "#ecc94b",
   70,
-  "#ea580c",
+  "#ed8936",
   85,
-  "#dc2626",
+  "#f56565",
 ] as unknown as maplibregl.ExpressionSpecification;
 
 function toGeoJSON(leads: LeadDTO[]): GeoJSON.FeatureCollection {
@@ -62,7 +63,6 @@ export function LeadsMap({
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
 
-  // אתחול חד-פעמי
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     const map = new maplibregl.Map({
@@ -73,9 +73,11 @@ export function LeadsMap({
       attributionControl: { compact: true },
     });
     mapRef.current = map;
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
+    map.addControl(
+      new maplibregl.NavigationControl({ showCompass: false }),
+      "top-left"
+    );
 
-    // התאמת גודל הקנבס כשרוחב המיכל משתנה (פתיחת/סגירת המגירה)
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(containerRef.current);
 
@@ -97,7 +99,7 @@ export function LeadsMap({
             9,
           ],
           "circle-stroke-width": 1.5,
-          "circle-stroke-color": "#ffffff",
+          "circle-stroke-color": "#0f1117",
           "circle-opacity": 0.9,
         },
       });
@@ -111,7 +113,9 @@ export function LeadsMap({
         const f = e.features?.[0];
         if (f) {
           popup
-            .setLngLat((f.geometry as GeoJSON.Point).coordinates as [number, number])
+            .setLngLat(
+              (f.geometry as GeoJSON.Point).coordinates as [number, number]
+            )
             .setHTML(`<strong>${f.properties?.title ?? ""}</strong>`)
             .addTo(map);
         }
@@ -138,7 +142,6 @@ export function LeadsMap({
     };
   }, []);
 
-  // עדכון נתונים כשהלידים משתנים
   const pendingRef = useRef<LeadDTO[]>(leads);
   pendingRef.current = leads;
   useEffect(() => {
@@ -151,18 +154,21 @@ export function LeadsMap({
   return (
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full" />
-      <div className="pointer-events-none absolute bottom-6 right-3 z-10 rounded-md border border-[var(--color-border)] bg-white/95 p-2.5 text-xs shadow-sm">
-        <div className="mb-1 font-semibold text-[var(--color-text)]">דחיפות</div>
+      <div className="pointer-events-none absolute bottom-6 right-3 z-10 rounded-lg border border-white/10 bg-dashboard-card/90 backdrop-blur-sm p-2.5 text-xs shadow-lg">
+        <div className="mb-1 font-semibold text-white">דחיפות</div>
         {[
-          ["#dc2626", "דחוף מאוד (85+)"],
-          ["#ea580c", "דחוף (70+)"],
-          ["#d97706", "בינוני (55+)"],
-          ["#2563eb", "נמוך (40+)"],
-          ["#64748b", "ארוך טווח"],
+          ["#f56565", "דחוף מאוד (85+)"],
+          ["#ed8936", "דחוף (70+)"],
+          ["#ecc94b", "בינוני (55+)"],
+          ["#4299e1", "נמוך (40+)"],
+          ["#718096", "ארוך טווח"],
         ].map(([c, l]) => (
           <div key={l} className="flex items-center gap-1.5 leading-5">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: c }} />
-            <span className="text-[var(--color-text-muted)]">{l}</span>
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: c }}
+            />
+            <span className="text-white/50">{l}</span>
           </div>
         ))}
       </div>

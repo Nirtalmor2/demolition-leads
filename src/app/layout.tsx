@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
 import "./globals.css";
 
-// Heebo — גופן Hebrew-native נקי, מתאים ל-dashboard צפוף-מידע.
 const heebo = Heebo({
   variable: "--font-heebo",
   subsets: ["hebrew", "latin"],
@@ -18,8 +17,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="he" dir="rtl" className={`${heebo.variable} h-full`}>
-      <body className="min-h-full">{children}</body>
+    <html lang="he" dir="rtl" className={`dark ${heebo.variable} h-full`}>
+      <body className="min-h-full antialiased">{children}</body>
     </html>
   );
 }
