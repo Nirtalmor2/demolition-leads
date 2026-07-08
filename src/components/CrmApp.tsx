@@ -55,6 +55,8 @@ export function CrmApp() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [total, setTotal] = useState(0);
+  const [totalUrgent, setTotalUrgent] = useState(0);
+  const [totalGeo, setTotalGeo] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -71,6 +73,8 @@ export function CrmApp() {
     const data = await res.json();
     setLeads(data.leads ?? []);
     setTotal(data.total ?? 0);
+    setTotalUrgent(data.totalUrgent ?? 0);
+    setTotalGeo(data.totalGeo ?? 0);
     setLoading(false);
   }, []);
 
@@ -85,11 +89,11 @@ export function CrmApp() {
     };
   }, [filters, page, pageSize, fetchLeads]);
 
-  const stats = useMemo(() => {
-    const urgent = leads.filter((l) => l.score >= 85).length;
-    const geo = leads.filter((l) => l.lat != null).length;
-    return { total: leads.length, urgent, geo };
-  }, [leads]);
+  const stats = useMemo(() => ({
+    total,
+    urgent: totalUrgent,
+    geo: totalGeo,
+  }), [total, totalUrgent, totalGeo]);
 
   const onStatusChange = async (id: string, status: LeadStatus) => {
     setLeads((prev) =>

@@ -83,8 +83,38 @@ export function LeadsTable({
   const from = total === 0 ? 0 : page * pageSize + 1;
   const to = Math.min((page + 1) * pageSize, total);
 
+  const exportUrl = (() => {
+    const sp = new URLSearchParams();
+    if (filters.source) sp.set("source", filters.source);
+    if (filters.city) sp.set("city", filters.city);
+    if (filters.status) sp.set("status", filters.status);
+    if (filters.minScore) sp.set("minScore", filters.minScore);
+    if (filters.q) sp.set("q", filters.q);
+    sp.set("sort", filters.sort);
+    sp.set("dir", filters.dir);
+    return `/api/leads/export?${sp.toString()}`;
+  })();
+
   return (
     <div className="flex h-full flex-col">
+      {/* Export toolbar */}
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.open(exportUrl, "_blank")}
+            className="flex cursor-pointer items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            aria-label="הורד לאקסל"
+            title="הורד לאקסל"
+          >
+            <img src="/excel.jpg" alt="Excel" className="h-5 w-5 mix-blend-multiply brightness-150" />
+            ייצוא לאקסל
+          </button>
+          <span className="text-xs text-white/30">
+            {total.toLocaleString("he-IL")} רשומות
+          </span>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-auto">
         <table className="w-full border-collapse text-sm">
           <thead>
