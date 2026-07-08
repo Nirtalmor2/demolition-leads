@@ -30,7 +30,7 @@ const VIEWS: { id: View; label: string; Icon: typeof TableIcon }[] = [
   { id: "kanban", label: "Kanban", Icon: KanbanIcon },
 ];
 
-function buildQuery(f: Filters): string {
+function buildQuery(f: Filters, take: number, skip: number): string {
   const sp = new URLSearchParams();
   if (f.source) sp.set("source", f.source);
   if (f.city) sp.set("city", f.city);
@@ -39,6 +39,8 @@ function buildQuery(f: Filters): string {
   if (f.q) sp.set("q", f.q);
   sp.set("sort", f.sort);
   sp.set("dir", f.dir);
+  sp.set("take", String(take));
+  sp.set("skip", String(skip));
   return sp.toString();
 }
 
@@ -50,6 +52,9 @@ export function CrmApp() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [now, setNow] = useState(new Date());
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [total, setTotal] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -57,23 +62,28 @@ export function CrmApp() {
     return () => clearInterval(t);
   }, []);
 
-  const fetchLeads = useCallback(async (f: Filters) => {
+  const fetchLeads = useCallback(async (f: Filters, pg: number, sz: number) => {
     setLoading(true);
-    const res = await fetch(`/api/leads?${buildQuery(f)}`, {
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `/api/leads?${buildQuery(f, sz, pg * sz)}`,
+      { cache: "no-store" }
+    );
     const data = await res.json();
     setLeads(data.leads ?? []);
+    setTotal(data.total ?? 0);
     setLoading(false);
   }, []);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchLeads(filters), 300);
+    debounceRef.current = setTimeout(
+      () => fetchLeads(filters, page, pageSize),
+      300
+    );
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [filters, fetchLeads]);
+  }, [filters, page, pageSize, fetchLeads]);
 
   const stats = useMemo(() => {
     const urgent = leads.filter((l) => l.score >= 85).length;
@@ -90,6 +100,13 @@ export function CrmApp() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
+  };
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  const handleFilterChange = (next: Filters) => {
+    setFilters(next);
+    setPage(0);
   };
 
   const clock = now.toLocaleTimeString("he-IL", {
@@ -220,7 +237,7 @@ export function CrmApp() {
 
                 {/* Refresh button */}
                 <button
-                  onClick={() => fetchLeads(filters)}
+                  onClick={() => fetchLeads(filters, page, pageSize)}
                   className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-md border border-white/20 bg-white/5 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
                   aria-label="רענון"
                   title="רענון"
@@ -274,7 +291,7 @@ export function CrmApp() {
             </div>
           </div>
 
-          <FilterBar filters={filters} onChange={setFilters} />
+          <FilterBar filters={filters} onChange={handleFilterChange} />
 
           {/* Content area */}
           <div className="flex rounded-xl border border-white/10 bg-dashboard-card overflow-hidden mt-4 animate-fade-in">
@@ -282,7 +299,7 @@ export function CrmApp() {
               <LeadDrawer
                 leadId={selectedId}
                 onClose={() => setSelectedId(null)}
-                onChanged={() => fetchLeads(filters)}
+                onChanged={() => fetchLeads(filters, page, pageSize)}
               />
             )}
 
@@ -293,8 +310,17 @@ export function CrmApp() {
                 <LeadsTable
                   leads={leads}
                   filters={filters}
-                  onChange={setFilters}
+                  onChange={handleFilterChange}
                   onSelect={setSelectedId}
+                  page={page}
+                  pageSize={pageSize}
+                  total={total}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                  onPageSizeChange={(sz) => {
+                    setPageSize(sz);
+                    setPage(0);
+                  }}
                 />
               ) : view === "map" ? (
                 <LeadsMap leads={leads} onSelect={setSelectedId} />

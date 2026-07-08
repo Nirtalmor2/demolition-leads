@@ -13,8 +13,10 @@ export async function GET(req: NextRequest) {
   const status = sp.get("status") || undefined;
   const minScore = sp.get("minScore");
   const q = sp.get("q") || undefined;
-  const sort = sp.get("sort") || "score"; // score | lastSeenAt | city
+  const sort = sp.get("sort") || "score";
   const dir = sp.get("dir") === "asc" ? "asc" : "desc";
+  const take = Number(sp.get("take") || "25");
+  const skip = Number(sp.get("skip") || "0");
 
   const where: Prisma.LeadWhereInput = { dupeOfId: null };
   if (source) where.source = source;
@@ -38,40 +40,43 @@ export async function GET(req: NextRequest) {
         : { score: dir };
 
   try {
-    const leads = await prisma.lead.findMany({
-      where,
-      orderBy,
-      take: 5000,
-      // לא מחזירים rawData ברשימה (מטען כבד) — הוא נטען רק בכרטיס ליד בודד.
-      select: {
-        id: true,
-        source: true,
-        externalId: true,
-        title: true,
-        url: true,
-        address: true,
-        city: true,
-        block: true,
-        parcel: true,
-        lat: true,
-        lng: true,
-        stage: true,
-        expectedMonths: true,
-        units: true,
-        score: true,
-        status: true,
-        assignee: true,
-        firstSeenAt: true,
-        lastSeenAt: true,
-        _count: { select: { notes: true } },
-      },
-    });
+    const [leads, total] = await Promise.all([
+      prisma.lead.findMany({
+        where,
+        orderBy,
+        take,
+        skip,
+        select: {
+          id: true,
+          source: true,
+          externalId: true,
+          title: true,
+          url: true,
+          address: true,
+          city: true,
+          block: true,
+          parcel: true,
+          lat: true,
+          lng: true,
+          stage: true,
+          expectedMonths: true,
+          units: true,
+          score: true,
+          status: true,
+          assignee: true,
+          firstSeenAt: true,
+          lastSeenAt: true,
+          _count: { select: { notes: true } },
+        },
+      }),
+      prisma.lead.count({ where }),
+    ]);
 
-    return NextResponse.json({ count: leads.length, leads });
+    return NextResponse.json({ total, count: leads.length, leads });
   } catch (error) {
     console.error("Failed to load leads from database", error);
     return NextResponse.json(
-      { count: 0, leads: [], warning: "database-unavailable" },
+      { total: 0, count: 0, leads: [], warning: "database-unavailable" },
       { status: 200 }
     );
   }
