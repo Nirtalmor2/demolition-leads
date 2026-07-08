@@ -6,10 +6,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Deployment to Vercel Production
 
-1. Work on branch `Ver1.1` (the active development branch)
+1. Work on any development branch (current branch at start of session)
 2. Before deploying, verify local build: `npx next build`
-3. Force-push `Ver1.1` to `main`: `git push origin Ver1.1:main --force`
-4. This triggers Vercel auto-deploy from the `main` branch
+3. Push your branch to `main`: `git push origin CURRENT_BRANCH:main --force`
+4. This triggers Vercel auto-deploy from the `main` branch (production)
 5. Check status: `npx vercel ls --prod`
 6. Production URL: https://nirobnzpoc.vercel.app/
 
