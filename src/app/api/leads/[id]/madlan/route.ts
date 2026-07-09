@@ -9,6 +9,7 @@ import {
   isMadlanProjectUrl,
   resolveMadlanByAddress,
   MadlanBlockedError,
+  ScraperApiOutOfCreditsError,
 } from "@/lib/madlan";
 import { lookupDeveloper } from "@/lib/developerLookup";
 
@@ -44,7 +45,13 @@ export async function POST(
     let m;
     try {
       m = await fetchMadlanDeveloper(url);
-    } catch {
+    } catch (e) {
+      if (e instanceof ScraperApiOutOfCreditsError) {
+        return NextResponse.json(
+          { error: "אזלו הקרדיטים ב-ScraperAPI (מכסת המשיכה נגמרה). יש לחדש/לשדרג את החשבון ב-ScraperAPI כדי להמשיך." },
+          { status: 402 }
+        );
+      }
       return NextResponse.json(
         { error: "מדלן חסם את הבקשה או שהדף לא נגיש כרגע. נסה שוב מאוחר יותר." },
         { status: 502 }
@@ -88,6 +95,12 @@ export async function POST(
     try {
       resolved = await resolveMadlanByAddress(lead.address, lead.city);
     } catch (e) {
+      if (e instanceof ScraperApiOutOfCreditsError) {
+        return NextResponse.json(
+          { error: "אזלו הקרדיטים ב-ScraperAPI (מכסת החיפוש נגמרה). יש לחדש/לשדרג את החשבון ב-ScraperAPI כדי לחפש שוב." },
+          { status: 402 }
+        );
+      }
       if (e instanceof MadlanBlockedError) {
         return NextResponse.json(
           { error: "מדלן חסם את הבקשה כרגע. נסה שוב מאוחר יותר." },

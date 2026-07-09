@@ -62,9 +62,33 @@ function extractDeveloper(html: string): MadlanDeveloper | null {
 /** שגיאת חסימה של מדלן (PerimeterX, 403/429) — להבדיל מ"פרויקט לא קיים". */
 export class MadlanBlockedError extends Error {}
 
+/** אזלו הקרדיטים/המכסה בחשבון ScraperAPI — הודעה ברורה למשתמש. */
+export class ScraperApiOutOfCreditsError extends Error {}
+
 // אם מוגדר מפתח ScraperAPI — כל הבקשות עוברות דרכו (פרוקסי residential + עקיפת
 // PerimeterX), מה שמאפשר אמינות גם מ-Vercel. בלי מפתח — fetch ישיר (נחסם בקלות).
 const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY;
+
+/** בדיקת יתרת קרדיטים ב-ScraperAPI. true אם אזלו (או שהגענו לתקרת המכסה). */
+async function scraperApiOutOfCredits(): Promise<boolean> {
+  if (!SCRAPERAPI_KEY) return false;
+  try {
+    const res = await fetch(`https://api.scraperapi.com/account?api_key=${SCRAPERAPI_KEY}`);
+    if (!res.ok) return false;
+    const d = (await res.json()) as {
+      creditsLeft?: number;
+      requestCount?: number;
+      requestLimit?: number;
+    };
+    if (typeof d.creditsLeft === "number") return d.creditsLeft <= 0;
+    if (typeof d.requestCount === "number" && typeof d.requestLimit === "number") {
+      return d.requestCount >= d.requestLimit;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
 
 function proxied(targetUrl: string): string {
   if (!SCRAPERAPI_KEY) return targetUrl;
@@ -80,8 +104,14 @@ async function fetchProjectHtml(projectUrl: string): Promise<string | null> {
   const res = await fetch(proxied(projectUrl), { headers: BROWSER_HEADERS, redirect: "follow" });
 
   if (SCRAPERAPI_KEY) {
-    // דרך הפרוקסי: 401 = בעיית מפתח/תוכנית; שאר non-200 (404 מועמד שגוי / 500 כשל) → נסה הבא.
-    if (res.status === 401) throw new MadlanBlockedError("ScraperAPI auth/plan error (401)");
+    // כשל הרשאה/מכסה (401/403/429): בדוק אם אזלו הקרדיטים — הודעה ברורה למשתמש.
+    if (res.status === 401 || res.status === 403 || res.status === 429) {
+      if (await scraperApiOutOfCredits()) {
+        throw new ScraperApiOutOfCreditsError("ScraperAPI credits exhausted");
+      }
+      // 401 = בעיית מפתח/תוכנית; אחרת (404 מועמד שגוי / 500 כשל) → נסה הבא.
+      if (res.status === 401) throw new MadlanBlockedError("ScraperAPI auth/plan error (401)");
+    }
     return res.ok ? res.text() : null;
   }
 
