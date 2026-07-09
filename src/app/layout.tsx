@@ -9,7 +9,7 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "Niro — לידים להריסות",
+  title: "BNZ Demolition",
   description: "מערכת לידים להריסות + CRM. כל הארץ, ממקורות פתוחים.",
 };
 
