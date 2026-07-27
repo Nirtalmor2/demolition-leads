@@ -1,5 +1,7 @@
 export const ALLOWED_EMAILS: string[] = [
   "nirtalmor2@gmail.com",
+  "sima.greenmix@gmail.com",
+  "zvi851@gmail.com",
 ];
 
 export const ALLOWED_DOMAINS: string[] = [];
