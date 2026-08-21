@@ -137,6 +137,12 @@ export function LeadsTable({
               <SortHeader label="יח״ד מתוכננות" filters={filters} onSort={onSort} />
               <SortHeader label="סטטוס" filters={filters} onSort={onSort} />
               <SortHeader
+                label="נוצר"
+                field="firstSeenAt"
+                filters={filters}
+                onSort={onSort}
+              />
+              <SortHeader
                 label="נצפה"
                 field="lastSeenAt"
                 filters={filters}
@@ -181,6 +187,9 @@ export function LeadsTable({
                 </td>
                 <td className="whitespace-nowrap px-3 py-2 text-white/50">
                   {STATUS_LABELS[l.status]}
+                </td>
+                <td className="whitespace-nowrap px-3 py-2 text-white/40">
+                  {fmtDate(l.firstSeenAt)}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2 text-white/40">
                   {fmtDate(l.lastSeenAt)}

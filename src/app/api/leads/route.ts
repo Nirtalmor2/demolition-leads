@@ -35,9 +35,11 @@ export async function GET(req: NextRequest) {
   const orderBy: Prisma.LeadOrderByWithRelationInput =
     sort === "lastSeenAt"
       ? { lastSeenAt: dir }
-      : sort === "city"
-        ? { city: dir }
-        : { score: dir };
+      : sort === "firstSeenAt"
+        ? { firstSeenAt: dir }
+        : sort === "city"
+          ? { city: dir }
+          : { score: dir };
 
   try {
     const [leads, total, totalUrgent] = await Promise.all([

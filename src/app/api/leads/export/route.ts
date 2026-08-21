@@ -12,7 +12,7 @@ import type { Source, Stage, LeadStatus } from "@/lib/domain";
 export const dynamic = "force-dynamic";
 
 const HEADER =
-  "כותרת,מקור,עיר,כתובת,שלב,דחיפות,יח״ד,סטטוס,נצפה לאחרונה,מוקצה,הערות\n";
+  "כותרת,מקור,עיר,כתובת,שלב,דחיפות,יח״ד,סטטוס,נוצר,נצפה לאחרונה,מוקצה,הערות\n";
 
 function esc(v: unknown): string {
   if (v == null) return "";
@@ -55,9 +55,11 @@ export async function GET(req: NextRequest) {
   const orderBy: Prisma.LeadOrderByWithRelationInput =
     sort === "lastSeenAt"
       ? { lastSeenAt: dir }
-      : sort === "city"
-        ? { city: dir }
-        : { score: dir };
+      : sort === "firstSeenAt"
+        ? { firstSeenAt: dir }
+        : sort === "city"
+          ? { city: dir }
+          : { score: dir };
 
   try {
     const leads = await prisma.lead.findMany({
@@ -73,6 +75,7 @@ export async function GET(req: NextRequest) {
         score: true,
         units: true,
         status: true,
+        firstSeenAt: true,
         lastSeenAt: true,
         assignee: true,
         _count: { select: { notes: true } },
@@ -89,6 +92,7 @@ export async function GET(req: NextRequest) {
         l.score,
         l.units ?? "",
         esc(STATUS_LABELS[l.status as LeadStatus] ?? l.status),
+        esc(fmtDate(l.firstSeenAt.toISOString())),
         esc(fmtDate(l.lastSeenAt.toISOString())),
         esc(l.assignee),
         l._count.notes,
