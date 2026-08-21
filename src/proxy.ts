@@ -11,8 +11,10 @@ export async function proxy(request: NextRequest) {
 
   const isLoginPage = request.nextUrl.pathname === "/login";
   const isAuthApi = request.nextUrl.pathname.startsWith("/api/auth");
+  // Cron ingest נקרא ע"י GitHub Actions / Vercel Cron ללא session — מאומת ע"י CRON_SECRET (אופציונלי) ב-route עצמו.
+  const isCronIngest = request.nextUrl.pathname === "/api/cron/ingest";
 
-  if (!session && !isLoginPage && !isAuthApi) {
+  if (!session && !isLoginPage && !isAuthApi && !isCronIngest) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
