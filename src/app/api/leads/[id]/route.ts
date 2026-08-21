@@ -17,6 +17,18 @@ export async function GET(
       include: { notes: { orderBy: { createdAt: "desc" } } },
     });
     if (!lead) return NextResponse.json({ error: "not found" }, { status: 404 });
+
+    // רישום צפייה ע"י משתמש — מעדכן את מועד הצפייה האחרון (נצפה).
+    try {
+      await prisma.lead.update({
+        where: { id },
+        data: { lastViewedAt: new Date() },
+      });
+      lead.lastViewedAt = new Date();
+    } catch {
+      // כשל ברישום הצפייה לא אמור להפיל את הצגת הליד.
+    }
+
     return NextResponse.json({ lead });
   } catch (error) {
     console.error("Failed to load lead from database", error);

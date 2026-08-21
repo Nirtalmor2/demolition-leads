@@ -144,7 +144,7 @@ export function LeadsTable({
               />
               <SortHeader
                 label="נצפה"
-                field="lastSeenAt"
+                field="lastViewedAt"
                 filters={filters}
                 onSort={onSort}
               />
@@ -192,7 +192,7 @@ export function LeadsTable({
                   {fmtDate(l.firstSeenAt)}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2 text-white/40">
-                  {fmtDate(l.lastSeenAt)}
+                  {l.lastViewedAt ? fmtDate(l.lastViewedAt) : ""}
                 </td>
                 <td className="px-3 py-2 text-center text-white/50">
                   {l._count?.notes ? l._count.notes : "—"}

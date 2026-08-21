@@ -24,6 +24,7 @@ export interface LeadDTO {
   developerSource: "madlan" | "web" | null;
   firstSeenAt: string;
   lastSeenAt: string;
+  lastViewedAt: string | null;
   rawData?: string; // JSON גולמי מהמקור — מוחזר רק בכרטיס ליד בודד
   _count?: { notes: number };
 }

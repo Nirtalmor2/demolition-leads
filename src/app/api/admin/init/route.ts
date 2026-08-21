@@ -55,6 +55,7 @@ const STATEMENTS = [
   `ALTER TABLE "Lead" ADD COLUMN IF NOT EXISTS "developer" TEXT`,
   `ALTER TABLE "Lead" ADD COLUMN IF NOT EXISTS "developerUrl" TEXT`,
   `ALTER TABLE "Lead" ADD COLUMN IF NOT EXISTS "developerSource" TEXT`,
+  `ALTER TABLE "Lead" ADD COLUMN IF NOT EXISTS "lastViewedAt" TIMESTAMP(3)`,
   `CREATE INDEX IF NOT EXISTS "Lead_city_idx" ON "Lead"("city")`,
   `CREATE INDEX IF NOT EXISTS "Lead_status_idx" ON "Lead"("status")`,
   `CREATE INDEX IF NOT EXISTS "Lead_source_idx" ON "Lead"("source")`,

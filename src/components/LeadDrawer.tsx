@@ -320,6 +320,10 @@ export function LeadDrawer({
               />
               <Row label="נצפה לראשונה" value={fmt(lead.firstSeenAt)} />
               <Row label="עודכן לאחרונה" value={fmt(lead.lastSeenAt)} />
+              <Row
+                label="נצפה"
+                value={lead.lastViewedAt ? fmt(lead.lastViewedAt) : null}
+              />
             </div>
 
             <ExtraDetails lead={lead} />

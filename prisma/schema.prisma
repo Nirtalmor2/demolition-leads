@@ -40,6 +40,7 @@ model Lead {
   notes          Note[]
   firstSeenAt    DateTime @default(now())
   lastSeenAt     DateTime @updatedAt
+  lastViewedAt   DateTime? // מועד צפייה אחרון ע"י משתמש (נצפה)
 
   @@unique([source, externalId])
   @@index([city])
